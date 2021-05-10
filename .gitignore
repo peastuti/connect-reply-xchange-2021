@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+.settings
+.project
+.cproject
+.vscode/
+
+build
+sdkconfig
+sdkconfig.old
+
