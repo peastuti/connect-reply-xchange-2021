@@ -3,8 +3,8 @@
 # project subdirectory.
 #
 
-PROJECT_NAME := iothub_devicetwin_samples_and_methods
+PROJECT_NAME := iothub_devicetwin_samples
 
-EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/../../../esp-azure
+EXTRA_COMPONENT_DIRS += $(PROJECT_PATH)/../esp-azure
 
 include $(IDF_PATH)/make/project.mk

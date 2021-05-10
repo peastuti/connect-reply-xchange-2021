@@ -3,5 +3,5 @@
 cmake_minimum_required(VERSION 3.5)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
-set (EXTRA_COMPONENT_DIRS "${CMAKE_CURRENT_BINARY_DIR}/../../../port")
-project(iothub_devicetwin_samples_and_methods)
+set (EXTRA_COMPONENT_DIRS "../esp-azure/port")
+project(iothub_devicetwin_samples)

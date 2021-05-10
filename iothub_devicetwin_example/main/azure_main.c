@@ -1,11 +1,3 @@
-/* esp-azure example
-
-   This example code is in the Public Domain (or CC0 licensed, at your option.)
-
-   Unless required by applicable law or agreed to in writing, this
-   software is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
-   CONDITIONS OF ANY KIND, either express or implied.
-*/
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -14,11 +6,7 @@
 #include "esp_system.h"
 #include "esp_system.h"
 #include "esp_wifi.h"
-#ifdef CONFIG_IDF_TARGET_ESP8266 || (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 0, 0))
-#include "esp_event_loop.h"
-#else
 #include "esp_event.h"
-#endif
 #include "esp_log.h"
 
 #include "nvs_flash.h"
@@ -40,29 +28,8 @@ const int CONNECTED_BIT = BIT0;
 static const char *TAG = "azure";
 
 extern int iothhub_devicetwin_init(void);
+extern int send_reported_telemetry(void);
 
-#ifdef CONFIG_IDF_TARGET_ESP8266 || (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 0, 0))
-static esp_err_t event_handler(void *ctx, system_event_t *event)
-{
-    switch(event->event_id) {
-    case SYSTEM_EVENT_STA_START:
-        esp_wifi_connect();
-        break;
-    case SYSTEM_EVENT_STA_GOT_IP:
-        xEventGroupSetBits(wifi_event_group, CONNECTED_BIT);
-        break;
-    case SYSTEM_EVENT_STA_DISCONNECTED:
-        /* This is a workaround as ESP platform WiFi libs don't currently
-           auto-reassociate. */
-        esp_wifi_connect();
-        xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
-        break;
-    default:
-        break;
-    }
-    return ESP_OK;
-}
-#else
 static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data)
 {
@@ -77,21 +44,14 @@ static void event_handler(void* arg, esp_event_base_t event_base,
         xEventGroupClearBits(wifi_event_group, CONNECTED_BIT);
     }
 }
-#endif
 
 static void initialise_wifi(void)
 {
-#ifdef CONFIG_IDF_TARGET_ESP8266 || (ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(4, 0, 0))
-    tcpip_adapter_init();
-    wifi_event_group = xEventGroupCreate();
-    ESP_ERROR_CHECK( esp_event_loop_init(event_handler, NULL) );
-#else
     ESP_ERROR_CHECK( esp_netif_init() );
     wifi_event_group = xEventGroupCreate();
     ESP_ERROR_CHECK( esp_event_loop_create_default() );
     esp_netif_t *sta_netif = esp_netif_create_default_wifi_sta();
     assert(sta_netif);
-#endif
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     ESP_ERROR_CHECK( esp_wifi_init(&cfg) );
@@ -116,6 +76,7 @@ static void initialise_wifi(void)
 }
 
 extern int iothub_client_device_twin_init();
+extern int send_reported_telemetry();
 void azure_task(void *pvParameter)
 {
     xEventGroupWaitBits(wifi_event_group, CONNECTED_BIT,
@@ -125,6 +86,17 @@ void azure_task(void *pvParameter)
     iothub_client_device_twin_init();
 
     vTaskDelete(NULL);
+}
+
+void telemetry_task(void *pvParameter)
+{
+    const TickType_t xDelay = 20000 / portTICK_PERIOD_MS;
+
+    for( ;; )
+    {
+        vTaskDelay( xDelay );
+        send_reported_telemetry();
+    }
 }
 
 void app_main()
@@ -141,5 +113,8 @@ void app_main()
 
     if ( xTaskCreate(&azure_task, "azure_task", 1024 * 6, NULL, 5, NULL) != pdPASS ) {
         printf("create azure task failed\r\n");
+    }
+    if ( xTaskCreate(&telemetry_task, "telemetry_task", 1024 * 6, NULL, 5, NULL) != pdPASS ) {
+        printf("create telemetry task failed\r\n");
     }
 }

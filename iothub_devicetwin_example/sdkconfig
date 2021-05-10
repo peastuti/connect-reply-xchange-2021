@@ -125,7 +125,7 @@ CONFIG_PARTITION_TABLE_MD5=y
 #
 CONFIG_WIFI_SSID="lol"
 CONFIG_WIFI_PASSWORD="canedeicani"
-CONFIG_IOTHUB_CONNECTION_STRING="HostName=iothub-raspy.azure-devices.net;DeviceId=esp32-giuse;SharedAccessKey=A70b2m90MKsvbPMGptucOiExt1vUMNV82hUbO0oJZ48="
+CONFIG_IOTHUB_CONNECTION_STRING="HostName=iothub-raspy.azure-devices.net;DeviceId=xchange-01;SharedAccessKey=gSvPxFcgfDlyL8CRnx0D8CYTJ79Q2yQVGad7FfCbJfY="
 # end of Example Configuration
 
 #

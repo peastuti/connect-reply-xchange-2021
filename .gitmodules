@@ -1,0 +1,3 @@
+[submodule "esp-azure"]
+	path = esp-azure
+	url = https://github.com/espressif/esp-azure
