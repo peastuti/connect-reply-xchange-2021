@@ -1,12 +1,19 @@
 import asyncio
 from azure.eventhub.aio import EventHubConsumerClient
 from azure.eventhub.extensions.checkpointstoreblobaio import BlobCheckpointStore
+import json
+from pprint import pprint
 
 
 async def on_event(partition_context, event):
-    # Print the event data.
-    print("Received the event: \"{}\" from the partition with ID: \"{}\"".format(event.body_as_str(encoding='UTF-8'), partition_context.partition_id))
-    print(event)
+    
+    print(f"\n\n----> Received new event from {event.properties[b'deviceId'].decode('utf-8')}")
+    current_temperature = event.body_as_json(encoding='UTF-8')['properties']['reported']['temperature']
+    print( f"New Reported Temperarature {current_temperature}.")
+
+    print("Let's save it in DB now!")
+
+
     # Update the checkpoint so that the program doesn't read the events
     # that it has already read when you run it next time.
     await partition_context.update_checkpoint(event)
