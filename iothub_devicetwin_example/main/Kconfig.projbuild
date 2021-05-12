@@ -2,13 +2,13 @@ menu "Example Configuration"
 
 config WIFI_SSID
     string "WiFi SSID"
-	default "myssid"
+	default "lol"
 	help
 		SSID (network name) for the example to connect to.
 
 config WIFI_PASSWORD
     string "WiFi Password"
-	default "myssid"
+	default "canedeicani"
 	help
 		WiFi password (WPA or WPA2) for the example to use.
 
@@ -16,7 +16,7 @@ config WIFI_PASSWORD
 
 config IOTHUB_CONNECTION_STRING
     string "IOT Hub Device Connection String"
-	default ""
+	default "HostName=iothub-raspy.azure-devices.net;DeviceId=xchange-01;SharedAccessKey=gSvPxFcgfDlyL8CRnx0D8CYTJ79Q2yQVGad7FfCbJfY="
     help
 		String containing Hostname, Device Id & Device Key in the format:
 		HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include <driver/gpio.h>
+#include "sdkconfig.h"
 #include "freertos/event_groups.h"
 
 #include "esp_system.h"
@@ -27,8 +29,14 @@ const int CONNECTED_BIT = BIT0;
 
 static const char *TAG = "azure";
 
+#define BUILTIN_LED 5
+
 extern int iothhub_devicetwin_init(void);
 extern int send_reported_telemetry(void);
+extern int get_blink_flag(void);
+extern int get_blink_interval(void);
+
+
 
 static void event_handler(void* arg, esp_event_base_t event_base,
                           int32_t event_id, void* event_data)
@@ -99,6 +107,22 @@ void telemetry_task(void *pvParameter)
     }
 }
 
+void blink_task(void *params)
+{
+    gpio_pad_select_gpio(BUILTIN_LED);
+    gpio_set_direction(BUILTIN_LED, GPIO_MODE_OUTPUT);
+    while(1)
+    {
+        if(get_blink_flag() != 0){
+            gpio_set_level(BUILTIN_LED, 1);
+            vTaskDelay(get_blink_interval() / portTICK_PERIOD_MS);
+            gpio_set_level(BUILTIN_LED, 0);
+            vTaskDelay(get_blink_interval() / portTICK_PERIOD_MS);
+        }
+        else gpio_set_level(BUILTIN_LED, 0);
+    }
+}
+
 void app_main()
 {
     // Initialize NVS
@@ -114,7 +138,10 @@ void app_main()
     if ( xTaskCreate(&azure_task, "azure_task", 1024 * 6, NULL, 5, NULL) != pdPASS ) {
         printf("create azure task failed\r\n");
     }
-    if ( xTaskCreate(&telemetry_task, "telemetry_task", 1024 * 6, NULL, 5, NULL) != pdPASS ) {
+    if ( xTaskCreate(&telemetry_task, "telemetry_task", 1024 * 6, NULL, 10, NULL) != pdPASS ) {
         printf("create telemetry task failed\r\n");
+    }
+    if ( xTaskCreate(&blink_task, "blink_task", 1024 * 6, NULL, 11, NULL) != pdPASS ) {
+        printf("create blink_task task failed\r\n");
     }
 }

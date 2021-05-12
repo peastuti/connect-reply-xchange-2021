@@ -20,12 +20,17 @@ static const char* connectionString = CONFIG_IOTHUB_CONNECTION_STRING;
 #define DOWORK_LOOP_NUM     3
 typedef struct IOT_DEVICE_TAG
 {
-    char* status;            // desired property
-    uint8_t temperature;    // reported property
+    char* status;           // desired property
+    int interval;       // desired property
+    int temperature;    // reported property
 } IoTDevice;
 
 IOTHUB_DEVICE_CLIENT_LL_HANDLE iotHubClientHandle;
 IOTHUB_CLIENT_TRANSPORT_PROVIDER protocol = MQTT_Protocol;
+
+int compare_status = 0;
+int blink_interval = 0;
+
 
 //  Converts the IoTDevice object into a JSON blob with reported properties that is ready to be sent across the wire as a twin.
 static char* serializeToJson(IoTDevice* ioTDevice)
@@ -45,7 +50,7 @@ static char* serializeToJson(IoTDevice* ioTDevice)
 }
 
 //  Converts the desired properties of the Device Twin JSON blob received from IoT Hub into a IoTDevice object.
-static IoTDevice* parseFromJson(const char* json, DEVICE_TWIN_UPDATE_STATE update_status)
+static IoTDevice* parseFromJson(const char* json, DEVICE_TWIN_UPDATE_STATE update_state)
 {
     IoTDevice* ioTDevice = malloc(sizeof(IoTDevice));
     JSON_Value* root_value = NULL;
@@ -65,14 +70,17 @@ static IoTDevice* parseFromJson(const char* json, DEVICE_TWIN_UPDATE_STATE updat
 
         // Only desired properties:
         JSON_Value* status;
+        JSON_Value* interval;
 
-        if (update_status == DEVICE_TWIN_UPDATE_COMPLETE)
+        if (update_state == DEVICE_TWIN_UPDATE_COMPLETE)
         {
             status = json_object_dotget_value(root_object, "desired.status");
+            interval = json_object_dotget_value(root_object, "desired.interval");
         }
         else
         {
             status = json_object_dotget_value(root_object, "status");
+            interval = json_object_dotget_value(root_object, "interval");
         }
 
         if (status != NULL)
@@ -87,6 +95,10 @@ static IoTDevice* parseFromJson(const char* json, DEVICE_TWIN_UPDATE_STATE updat
                     (void)strcpy(ioTDevice->status, data);
                 }
             }
+        }
+        if (interval != NULL)
+        {
+            ioTDevice->interval = (int)json_value_get_number(interval);
         }
 
         json_value_free(root_value);
@@ -109,11 +121,17 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
             if ((oldIoTDevice->status != NULL) && (strcmp(oldIoTDevice->status, newIoTDevice->status) != 0))
             {
                 free(oldIoTDevice->status);
+                oldIoTDevice->status = NULL;
             }
 
             if (oldIoTDevice->status == NULL)
-            {
-                printf("Received a new status from the Cloud = %s\n", newIoTDevice->status);
+            {   
+                printf("\n-----------\n");
+                printf("\nReceived a new status = %s\n", newIoTDevice->status);
+                printf("\n-----------\n\n");
+                
+                compare_status = strcmp(newIoTDevice->status, "LOW");
+
                 if ( NULL != (oldIoTDevice->status = malloc(strlen(newIoTDevice->status) + 1)))
                 {
                     (void)strcpy(oldIoTDevice->status, newIoTDevice->status);
@@ -121,6 +139,17 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
                 }
             }
         }
+
+        if (newIoTDevice->interval != 0)
+        {
+            if (newIoTDevice->interval != oldIoTDevice->interval)
+            {
+                printf("Received a new interval = %d\n", newIoTDevice->interval);
+                oldIoTDevice->interval = newIoTDevice->interval;
+                blink_interval = newIoTDevice->interval;
+            }
+        }
+
 
         free(newIoTDevice);
     }
@@ -133,7 +162,8 @@ static void deviceTwinCallback(DEVICE_TWIN_UPDATE_STATE update_state, const unsi
 static void reportedstatusCallback(int status_code, void* userContextCallback)
 {
     (void)userContextCallback;
-    printf("Device Twin reported properties update completed with result: %d\r\n", status_code);
+    printf("\t- Response: %d\n", status_code);
+    // printf("Device Twin reported properties update completed with result: %d\r\n", status_code);
 }
 
 static void iothub_client_device_twin(void)
@@ -189,7 +219,7 @@ int send_reported_telemetry(void)
     srand(time(NULL));
     ioTDevice.temperature = (u_int8_t)rand()%(100);
 
-    printf("Sending new temperature telemetry: %d\n", ioTDevice.temperature);
+    printf("Sending new temperature telemetry: %d\t", ioTDevice.temperature);
 
     char* reportedProperties = serializeToJson(&ioTDevice);
     if (reportedProperties != NULL)
@@ -205,6 +235,16 @@ int send_reported_telemetry(void)
     }
 
     return 0;
+}
+
+int get_blink_flag(void)
+{
+    return compare_status;
+}
+
+int get_blink_interval(void)
+{
+    return blink_interval;
 }
 
 int iothub_client_device_twin_init(void)
