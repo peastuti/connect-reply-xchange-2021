@@ -3,7 +3,22 @@ from azure.eventhub.aio import EventHubConsumerClient
 from azure.eventhub.extensions.checkpointstoreblobaio import BlobCheckpointStore
 import json
 from pprint import pprint
+from influxdb import InfluxDBClient
 
+influx_client = InfluxDBClient('localhost', 8086, 'admin', 'admin', 'nestle')
+influx_client.switch_database('nestle')
+
+def save_on_influx(deviceId, temperature):
+    element = {
+        "measurement": "Contacts",
+        "tags": {
+            "deviceId": deviceId
+        },
+        "fields": {
+            "temperature": temperature
+        }
+    }
+    influx_client.write_points(element, time_precision='ms')
 
 async def on_event(partition_context, event):
     
@@ -11,8 +26,8 @@ async def on_event(partition_context, event):
     current_temperature = event.body_as_json(encoding='UTF-8')['properties']['reported']['temperature']
     print( f"New Reported Temperarature {current_temperature}.")
 
-    print("Let's save it in DB now!")
-
+    # print("Let's save it in DB now!")
+    # save_on_influx(event.properties[b'deviceId'].decode('utf-8'), current_temperature)
 
     # Update the checkpoint so that the program doesn't read the events
     # that it has already read when you run it next time.
