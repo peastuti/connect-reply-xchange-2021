@@ -16,7 +16,7 @@ config WIFI_PASSWORD
 
 config IOTHUB_CONNECTION_STRING
     string "IOT Hub Device Connection String"
-	default "HostName=iothub-raspy.azure-devices.net;DeviceId=xchange-01;SharedAccessKey=gSvPxFcgfDlyL8CRnx0D8CYTJ79Q2yQVGad7FfCbJfY="
+	default "HostName=xchange2021.azure-devices.net;DeviceId=xchange2021-01;SharedAccessKey=jqPku6QJVd1AaNSywIocysZcDL7InPAlPR6HrObRmQk="
     help
 		String containing Hostname, Device Id & Device Key in the format:
 		HostName=<host_name>;DeviceId=<device_id>;SharedAccessKey=<device_key>

@@ -3,7 +3,7 @@ from flask import Flask, request
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import Twin, TwinProperties
 
-IOTHUB_CONNECTION_STRING = "HostName=iothub-raspy.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=BaR8uyMs+JBS1i3Zk7d+nsB9zoyuiO7YnL/K1YHPMU0="
+IOTHUB_CONNECTION_STRING = "HostName=xchange2021.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=TjBGR1AD4IwaNIP70S4/4OtVseaqZIrUgYWW7dKeZFA="
 
 app = Flask(__name__)
 
@@ -29,17 +29,6 @@ def status(deviceId):
         return twin.properties.reported
     except Exception:
         return "Not found!"
-
-@app.route('/<deviceId>/desired', methods = ['GET'])
-def desired(deviceId):
-    try:
-        iothub_registry_manager = IoTHubRegistryManager(IOTHUB_CONNECTION_STRING)
-        twin = iothub_registry_manager.get_twin(deviceId)
-
-        return twin.properties.desired
-    except Exception:
-        return "Not found!"
-    
     
 if __name__ == "__main__":
     app.run(debug=True)
