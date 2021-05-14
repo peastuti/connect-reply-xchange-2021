@@ -22,33 +22,36 @@ EVENTHUB_NAME = "xchange2021hub"
 STORAGE_CONNECTION_STR = "DefaultEndpointsProtocol=https;AccountName=xchange2021;AccountKey=7jZXlQR41UYfiZgeQbz417ZvfaiLHtApidbXnVE0U6UlHW+HClnk/KQgSRXsKN+DRx7jMtLhl1RGXERyq0QGgg==;EndpointSuffix=core.windows.net"
 BLOB_CONTAINER_NAME = "xchange2021"
 
-influx_client = InfluxDBClient('localhost', 8086, 'admin', 'admin', 'xchange')
+influx_client = InfluxDBClient('localhost', 8086, 'admin', 'password', 'xchange')
 influx_client.switch_database('xchange')
 
 def save_on_influx(deviceId, temperature):
-    element = {
-        "measurement": "Contacts",
+    element = [{
+        "measurement": "Telemetry",
         "tags": {
             "deviceId": deviceId
         },
         "fields": {
             "temperature": temperature
         }
-    }
-    influx_client.write_points(element, time_precision='ms')
+    }]
+    if influx_client.write_points(element, time_precision='ms'):
+        print(f"Successfully saved!\n\n")
 
 async def on_event(partition_context, event):
+    try:
+        await partition_context.update_checkpoint(event)
 
-    deviceId = str(event.properties[b'deviceId'].decode('utf-8'))
-    current_temperature = int(event.body_as_json(encoding='UTF-8')['properties']['reported']['temperature'])
+        deviceId = str(event.properties[b'deviceId'].decode('utf-8'))
+        current_temperature = int(event.body_as_json(encoding='UTF-8')['properties']['reported']['temperature'])
 
-    print(f"{bc.OKGREEN}----> Received new event from: {bc.BOLD}{deviceId}.{bc.ENDC}")
-    print(f"{bc.OKBLUE}-> New Reported Temperarature: {bc.BOLD}{current_temperature}.{bc.ENDC}")
+        print(f"{bc.OKGREEN}----> Received new event from: {bc.BOLD}{deviceId}.{bc.ENDC}")
+        print(f"{bc.OKBLUE}-> New Reported Temperarature: {bc.BOLD}{current_temperature}.{bc.ENDC}")
 
-    print(f"{bc.UNDERLINE}Let's save it in DB now!{bc.ENDC}\n\n")
-    # save_on_influx(deviceId, current_temperature)
-
-    await partition_context.update_checkpoint(event)
+        print(f"{bc.UNDERLINE}Let's save it in DB now!{bc.ENDC}\n")
+        save_on_influx(deviceId, current_temperature)
+    except Exception:
+        pass
 
 
 async def receive(client):
