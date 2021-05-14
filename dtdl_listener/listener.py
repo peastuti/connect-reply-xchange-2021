@@ -46,7 +46,7 @@ async def on_event(partition_context, event):
     print(f"{bc.OKBLUE}-> New Reported Temperarature: {bc.BOLD}{current_temperature}.{bc.ENDC}")
 
     print(f"{bc.UNDERLINE}Let's save it in DB now!{bc.ENDC}\n\n")
-    # save_on_influx(deviceId, current_temperature)
+    save_on_influx(deviceId, current_temperature)
 
     await partition_context.update_checkpoint(event)
 
