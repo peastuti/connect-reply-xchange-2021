@@ -1,6 +1,3 @@
 [submodule "esp-azure"]
 	path = esp-azure
 	url = https://github.com/espressif/esp-azure
-[submodule "docker-compose-influxdb-grafana"]
-	path = docker-compose-influxdb-grafana
-	url = https://github.com/jkehres/docker-compose-influxdb-grafana
