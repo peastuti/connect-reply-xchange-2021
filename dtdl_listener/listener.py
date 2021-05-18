@@ -29,9 +29,11 @@ def save_on_influx(deviceId, temperature):
     element = [{
         "measurement": "Telemetry",
         "tags": {
-            "deviceId": deviceId
+            "deviceId": deviceId,
+            "temperature": temperature
         },
         "fields": {
+            "deviceId": deviceId,
             "temperature": temperature
         }
     }]
