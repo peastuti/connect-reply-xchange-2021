@@ -3,7 +3,7 @@ from flask import Flask, request
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import Twin, TwinProperties
 
-IOTHUB_CONNECTION_STRING = "HostName=xchange2021.azure-devices.net;SharedAccessKeyName=iothubowner;SharedAccessKey=TjBGR1AD4IwaNIP70S4/4OtVseaqZIrUgYWW7dKeZFA="
+IOTHUB_CONNECTION_STRING = "YourIoTHuBConnectionString"
 
 app = Flask(__name__)
 
