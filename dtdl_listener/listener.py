@@ -17,13 +17,13 @@ class bc:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-CONNECTION_STR = "Endpoint=sb://xchange2021.servicebus.windows.net/;SharedAccessKeyName=iothubroutes_xchange2021;SharedAccessKey=8FBiKfet5mdQsv0qQ6ptSY6myc2pKW0rRg/2C+w20gU=;EntityPath=xchange2021hub"
-EVENTHUB_NAME = "xchange2021hub"
-STORAGE_CONNECTION_STR = "DefaultEndpointsProtocol=https;AccountName=xchange2021;AccountKey=7jZXlQR41UYfiZgeQbz417ZvfaiLHtApidbXnVE0U6UlHW+HClnk/KQgSRXsKN+DRx7jMtLhl1RGXERyq0QGgg==;EndpointSuffix=core.windows.net"
-BLOB_CONTAINER_NAME = "xchange2021"
+CONNECTION_STR = "Endpoint=sb://YOUR_EVENT_HUBS.servicebus.windows.net/;SharedAccessKeyName=YOUR_ROUTES_EVENT_HUBS;SharedAccessKey=XXXXXXXXX=;EntityPath=YOUR_EVENT_HUBS"
+EVENTHUB_NAME = "YOUR_EVENT_HUBS"
+STORAGE_CONNECTION_STR = "DefaultEndpointsProtocol=https;AccountName=STORAGE_SERVER;AccountKey=YOUR_ACCOUNT_KEY;EndpointSuffix=core.windows.net"
+BLOB_CONTAINER_NAME = "YOUR_BLOB_CONTAINER"
 
-influx_client = InfluxDBClient('localhost', 8086, 'admin', 'password', 'xchange')
-influx_client.switch_database('xchange')
+influx_client = InfluxDBClient('localhost', 8086, 'admin', 'password', 'YOUR_INFLUX_DB_DATABASE')
+influx_client.switch_database('YOUR_INFLUX_DB_DATABASE')
 
 def save_on_influx(deviceId, temperature):
     element = [{
