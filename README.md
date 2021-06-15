@@ -5,5 +5,7 @@ Hi there, this is the official repository of the Xchange Show Me How session tha
 
 This repo is intended to be as an easy guide and walkthrough the major techniques that are evolving the way of doing IoT. None of this code snippet could go in production, everything has the pure scope to demonstrate and prototype an architecture with Azure IoTHuB, DTDL, Azure Storage, Azure Event Hubs, Python, Grafana and InfluxDB.
 
+If anything is missing, open an Issue or make a Pull Request, we'll try to keep this repo as updated as possible.
+
 In particular, this project is composed of:
 - `cloud-configuration` folder in which you will find a complete list
